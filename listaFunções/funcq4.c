@@ -1,5 +1,6 @@
 #include <stdio.h>
 #define MAX 3
+
 void listNum ( int lista[MAX]) {
     for (int i = 0; i < MAX ; i++) {
         printf("Digite o numero %d: \n", i+1);
