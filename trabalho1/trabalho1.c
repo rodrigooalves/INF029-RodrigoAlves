@@ -11,7 +11,7 @@
 //  O aluno deve preencher seus dados abaixo, e implementar as questões do trabalho
 
 //  ----- Dados do Aluno -----
-//  Nome: Rodrigo Amorim Alves
+//  Nome: Rodrigo Amorim Alves 
 //  email: rodrigoamorim.bc@hotmail.com
 //  Matrícula: 20241160002
 //  Semestre: 2
@@ -22,8 +22,9 @@
 // #################################################
 
 #include <stdio.h>
-#include "trabalho1.h" // Substitua pelo seu arquivo de header renomeado
 #include <stdlib.h>
+#include <string.h>
+#include "trabalho1.h" // Substitua pelo seu arquivo de header renomeado
 
 DataQuebrada quebraData(char data[]);
 
@@ -293,4 +294,3 @@ DataQuebrada quebraData(char data[]){
     
   return dq;
 }
-
