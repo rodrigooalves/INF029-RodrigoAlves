@@ -94,11 +94,39 @@ int teste(int a)
 int q1(char data[])
 {
   int datavalida = 1;
+  DataQuebrada novaData = quebraData(data);
+  if(novaData.valido == 0)
+    datavalida = 0; 
+  int dia = novaData.iDia, mes = novaData.iMes, ano = novaData.iAno;
+  if(mes < 1 || mes < 12)
+    datavalida = 0;
+  if(ano < 0)
+    datavalida = 0;
+  if(mes == 2){
+    if(dia > 29) {
+      datavalida = 0;
+    } 
+  } else if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)){
+    if(dia>29){
+      datavalida = 0;
+    }
+    else {
+      if(dia > 28){
+        datavalida = 0;
+      }
+    }
+  }
 
-  //quebrar a string data em strings sDia, sMes, sAno
+  if( mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes == 8 || mes == 10 || mes == 12) {
+    if ( dia > 31){
+      datavalida = 0;
+    }
+  }
 
-
-  //printf("%s\n", data);
+  if (mes == 3|| mes == 6|| mes == 9 || mes == 11) {
+    if ( dia > 30 )
+      datavalida = 0;
+  }
 
   if (datavalida)
       return 1;
@@ -135,18 +163,31 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
       dma.retorno = 3;
       return dma;
     }else{
-      //verifique se a data final não é menor que a data inicial
-      
-      //calcule a distancia entre as datas
-
-
-      //se tudo der certo
+      DataQuebrada dataInicial = quebraData(datainicial);
+      DataQuebrada dataFinal = quebraData(datafinal);
+      if(dataInicial.iAno > dataFinal.iAno || (dataInicial.iAno == dataFinal.iAno && dataInicial.iMes > dataFinal.iMes) || (dataInicial.iAno == dataFinal.iAno && dataInicial.iMes == dataFinal.iMes && dataInicial.iDia > dataFinal.iDia)){
+        dma.retorno = 4;
+        return dma;
+      }  
+      int dias = dataFinal.iDia - dataInicial.iDia;
+      int meses = dataFinal.iMes - dataInicial.iMes;
+      int anos = dataFinal.iAno - dataInicial.iAno;
+      if(dias < 0){
+        meses--;
+        dias = dias + quantidadeDeDias((dataFinal.iMes == 1 ? 12 : dataFinal.iMes - 1), dataFinal.iAno); //Eu não costumo usar operador ternário, mas como não posso usar condicional nesse contexto, teve que ser ele, perdão!
+      }
+      if(meses < 0){
+        anos--;
+        meses = meses + 12;
+      } 
+      dma.qtdAnos = anos;
+      dma.qtdMeses = meses;
+      dma.qtdDias = dias;      
       dma.retorno = 1;
-      return dma;
-      
-    }
-    
+      return dma;      
+    }    
 }
+
 
 /*
  Q3 = encontrar caracter em texto
@@ -158,12 +199,36 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
  @saida
     Um número n >= 0.
  */
-int q3(char *texto, char c, int isCaseSensitive)
-{
-    int qtdOcorrencias = -1;
-
-    return qtdOcorrencias;
+int q3(char *texto, char c, int isCaseSensitive){
+  int qtdOcorrencias = 0;
+  int i = 0;
+  char fraseSemAcento[127];
+  if(isCaseSensitive){
+    removerAcentos(texto, fraseSemAcento);
+    while(texto[i] != '\0'){
+      if(c == texto[i]){
+        qtdOcorrencias++;
+      }
+      i++;
+    }
+  }
+  if(!isCaseSensitive){
+    removerAcentos(texto, fraseSemAcento);
+    tudoMinusculo(fraseSemAcento);
+    if(c>='A' && c<= 'Z'){
+      c=c+32;
+    }
+    while(fraseSemAcento[i] != '\0'){
+      if(fraseSemAcento[i] == c){
+        qtdOcorrencias++;
+      }
+      i++;
+    }    
+  }
+  return qtdOcorrencias;
 }
+
+
 
 /*
  Q4 = encontrar palavra em texto
@@ -182,11 +247,29 @@ int q3(char *texto, char c, int isCaseSensitive)
  */
 int q4(char *strTexto, char *strBusca, int posicoes[30])
 {
-    int qtdOcorrencias = -1;
-
+    int qtdOcorrencias = 0, j=0, k=0;
+    int tamTexto = strlen(strTexto);
+    int tamBusca = strlen(strBusca);
+    
+    for(int i = 0; i<tamTexto; i++){
+      if(strBusca[0] == strTexto[i]){
+        for(j=0; j<tamBusca; j++){
+          if(strBusca[j] != strTexto[i+j]){
+            break;
+          }
+        }
+        if(j == tamBusca){
+          qtdOcorrencias++;
+          posicoes[k] = i + 1;
+          k++;          
+          posicoes[k] = i + tamBusca;
+          k++;
+          i = i + j - 1;
+        }
+      }
+    }
     return qtdOcorrencias;
 }
-
 /*
  Q5 = inverte número
  @objetivo
@@ -197,10 +280,21 @@ int q4(char *strTexto, char *strBusca, int posicoes[30])
     Número invertido
  */
 
-int q5(int num)
-{
-
-    return num;
+int q5(int num){
+  int casas = tamanhoNumero(num);
+  int digitos[127];
+  int base = 1;
+  int numInvertido=0;
+  for(int i=0; i < casas; i++){
+    digitos[i] = (num/base)%10;
+    base *= 10;
+  }
+  for(int i = 0; i < casas; i++){
+    numInvertido = numInvertido + digitos[i]*base;
+    base = base/10;
+  }
+  numInvertido = numInvertido/10;
+  return numInvertido;
 }
 
 /*
@@ -213,9 +307,28 @@ int q5(int num)
     Quantidade de vezes que número de busca ocorre em número base
  */
 
-int q6(int numerobase, int numerobusca)
-{
-    int qtdOcorrencias;
+int q6(int numerobase, int numerobusca){
+    int qtdOcorrencias=0;
+    int j;
+    int tamNumBase = tamanhoNumero(numerobase);
+    int tamNumBusca = tamanhoNumero(numerobusca);
+    char numBaseString[127];
+    sprintf(numBaseString, "%d", numerobase); // 3567
+    char numBuscaString[127];
+    sprintf(numBuscaString, "%d", numerobusca); //56
+    for(int i = 0; i <= tamNumBase - tamNumBusca; i++){
+      if(numBuscaString[0]==numBaseString[i]){
+        for(j = 0; j < tamNumBusca; j++){
+          if(numBuscaString[j] != numBaseString[j+i]){
+            break;
+          }
+        }
+        if(j == tamNumBusca){
+          qtdOcorrencias++;
+          i = i + tamNumBusca - 1;          
+        }
+      }
+    }
     return qtdOcorrencias;
 }
 
@@ -229,11 +342,35 @@ int q6(int numerobase, int numerobusca)
     1 se achou 0 se não achou
  */
 
- int q7(char matriz[8][10], char palavra[5])
- {
-     int achou;
-     return achou;
- }
+int q7(char matriz[8][10], char palavra[5]) {
+    int linhas = 8, colunas = 10;
+    int tamPalavra = strlen(palavra);
+    
+    int direcoes[8][2] = {{0, 1}, {1, 0}, {1, 1}, {1, -1}, {0, -1}, {-1, 0}, {-1, -1}, {-1, 1}};
+    
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < colunas; j++) {
+            for (int d = 0; d < 8; d++) {
+                int dirX = direcoes[d][0], dirY = direcoes[d][1];
+                int k, x = i, y = j;
+                int encontrado = 1;
+                
+                for (k = 0; k < tamPalavra; k++) {
+                    if (x < 0 || x >= linhas || y < 0 || y >= colunas || matriz[x][y] != palavra[k]) {
+                        encontrado = 0;
+                        break;
+                    }
+                    x += dirX;
+                    y += dirY;
+                }
+                
+                if (encontrado) {
+                    return 1;  
+                }
+            }
+        }
+    }
+}
 
 
 
