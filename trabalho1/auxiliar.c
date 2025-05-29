@@ -3,81 +3,106 @@
 #include <stdlib.h>
 #include "trabalho1.h"
 
-int anoBissexto(int ano){
-  return (ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0);
+
+//Função para verificar se o ano é bissexto
+int bissexto(int ano){
+    //Checa se o aaaa tem 2 caracteres e insere +2000 anos, como sugerido
+    if (ano < 100){
+        ano += 2000;
+    }
+    
+	if ((ano % 4 == 0 && ano % 100 != 0) || ano % 400 == 0){
+		return 1;
+	}
+
+	return 0;
 }
-//Apenas alterna a quantidade de dias dependendo do mês
-int quantidadeDeDias(int mes, int ano){
-  switch(mes){
-    case 4: case 6: case 9: case 11: return 30;
-    case 2: return anoBissexto(ano) ? 29 : 28;
-    default: return 31;
-  }
-}
-int tamanhoNumero(int numero){  
-  char numeroString[127];
-  sprintf(numeroString, "%d", numero);
-  return strlen(numeroString);
-}
-void removerAcentos(const char *texto, char *fraseSemAcento) {
-    int i = 0, j = 0;
-    while (texto[i] != '\0') {
-        // Verifica os bytes iniciais de caracteres em UTF-8
-        if ((unsigned char)texto[i] == 0xC3) { // Caractere acentuado
-            switch ((unsigned char)texto[i + 1]) {
-                case 0xA0: case 0xA1: case 0xA2: case 0xA3: case 0xA4: // á à â ã ä
-                    fraseSemAcento[j++] = 'a';
-                    break;
-                case 0xA8: case 0xA9: case 0xAA: case 0xAB: // é è ê ë
-                    fraseSemAcento[j++] = 'e';
-                    break;
-                case 0xAC: case 0xAD: case 0xAE: case 0xAF: // í ì î ï
-                    fraseSemAcento[j++] = 'i';
-                    break;
-                case 0xB2: case 0xB3: case 0xB4: case 0xB5: case 0xB6: // ó ò ô õ ö
-                    fraseSemAcento[j++] = 'o';
-                    break;
-                case 0xB9: case 0xBA: case 0xBB: case 0xBC: // ú ù û ü
-                    fraseSemAcento[j++] = 'u';
-                    break;
-                case 0xA7: // ç
-                    fraseSemAcento[j++] = 'c';
-                    break;
-                case 0x80: case 0x81: case 0x82: case 0x83: case 0x84: // Á À Â Ã Ä
-                    fraseSemAcento[j++] = 'A';
-                    break;
-                case 0x88: case 0x89: case 0x8A: case 0x8B: // É È Ê Ë
-                    fraseSemAcento[j++] = 'E';
-                    break;
-                case 0x8C: case 0x8D: case 0x8E: case 0x8F: // Í Ì Î Ï
-                    fraseSemAcento[j++] = 'I';
-                    break;
-                case 0x92: case 0x93: case 0x94: case 0x95: case 0x96: // Ó Ò Ô Õ Ö
-                    fraseSemAcento[j++] = 'O';
-                    break;
-                case 0x99: case 0x9A: case 0x9B: case 0x9C: // Ú Ù Û Ü
-                    fraseSemAcento[j++] = 'U';
-                    break;
-                case 0x87: // Ç
-                    fraseSemAcento[j++] = 'C';
-                    break;
-                default:
-                    fraseSemAcento[j++] = texto[i + 1]; // Caractere não mapeado
-                    break;
-            }
-            i += 2; // Pula os dois bytes do caractere UTF-8
-        } else {
-            fraseSemAcento[j++] = texto[i++]; // Copia diretamente outros caracteres
+
+//Usada na Q1 e Q2, cria um array para dizer quais os dias em cada mês
+int diasNoMes(int mes, int ano) {
+    int diasPorMes[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    
+    // if fevereiro, checa bissexto
+    if (mes == 2) {
+        if (bissexto(ano)) {
+             // Fevereiro = 29 no bissexto
+            return 29;
         }
     }
-    fraseSemAcento[j] = '\0'; // Finaliza a string
+    return diasPorMes[mes - 1];
 }
-void tudoMinusculo(char *fraseSemAcento){
-  int i = 0;
-  while(fraseSemAcento[i] != '\0'){
-    if(fraseSemAcento[i]>='A' && fraseSemAcento[i]<='Z'){
-      fraseSemAcento[i]=fraseSemAcento[i]+32;
+
+//Função usada na Q3 para converter maiúsculos para minúsculos
+int paraMinusculo(char ch) {
+    if (ch >= 'A' && ch <= 'Z') {
+        return ch + ('a' - 'A');
     }
-    i++;
+    return ch;
+}
+
+int calcularTamanho(char palavra[]) {
+    int tamanho = 0;
+    while (palavra[tamanho] != '\0') {
+        tamanho++;
+    }
+    return tamanho;
+}
+
+int procurarDirecao(char matriz[8][10], int linha, int coluna, char palavra[], int dx, int dy) {
+    int tamanho = calcularTamanho(palavra);
+
+    for (int i = 0; i < tamanho; i++) {
+        int novaLinha = linha + i * dx;
+        int novaColuna = coluna + i * dy;
+
+        // Verifica limites da matriz
+        if (novaLinha < 0 || novaLinha >= 8 || novaColuna < 0 || novaColuna >= 10)
+            return 0;
+
+        // Verifica caractere da matriz com a letra da palavra
+        if (matriz[novaLinha][novaColuna] != palavra[i])
+            return 0;
+    }
+
+    return 1; // Palavra encontrada nessa direção
+}
+
+void naoEspeciais(char *text){
+  int i, j=0;
+
+  const char *comAcentos[] = {"Ä", "Å", "Á", "Â", "À", "Ã", "ä", "á", "â", "à", "ã",
+                                "É", "Ê", "Ë", "È", "é", "ê", "ë", "è",
+                                "Í", "Î", "Ï", "Ì", "í", "î", "ï", "ì",
+                                "Ö", "Ó", "Ô", "Ò", "Õ", "ö", "ó", "ô", "ò", "õ",
+                                "Ü", "Ú", "Û", "ü", "ú", "û", "ù",
+                                "Ç", "ç"};
+                                
+  const char *semAcentos[] = {"A", "A", "A", "A", "A", "A", "a", "a", "a", "a", "a",
+                              "E", "E", "E", "E", "e", "e", "e", "e",
+                              "I", "I", "I", "I", "i", "i", "i", "i",
+                              "O", "O", "O", "O", "O", "o", "o", "o", "o", "o",
+                              "U", "U", "U", "u", "u", "u", "u",
+                              "C", "c"};
+
+  char buffer[256];
+  buffer[0] = '\0';
+
+  for (int i = 0; i < strlen(text);) {
+    int found = 0;
+    for (int j = 0; j < sizeof(comAcentos) / sizeof(comAcentos[0]); j++) {
+      int len = strlen(comAcentos[j]);
+
+      if (strncmp(&text[i], comAcentos[j], len) == 0) {
+        strcat(buffer, semAcentos[j]);
+        i += len;
+        found = 1;
+        break;
+      }
+    }
+    if (!found) {
+      strncat(buffer, &text[i], 1);
+      i++;
+    }
   }
+  strcpy(text, buffer);
 }
