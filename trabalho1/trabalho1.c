@@ -174,7 +174,7 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
       int anos = dataFinal.iAno - dataInicial.iAno;
       if(dias < 0){
         meses--;
-        dias = dias + quantidadeDeDias((dataFinal.iMes == 1 ? 12 : dataFinal.iMes - 1), dataFinal.iAno); //Eu não costumo usar operador ternário, mas como não posso usar condicional nesse contexto, teve que ser ele, perdão!
+        dias = dias + quantidadeDeDias((dataFinal.iMes == 1 ? 12 : dataFinal.iMes - 1), dataFinal.iAno);
       }
       if(meses < 0){
         anos--;
